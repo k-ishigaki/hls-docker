@@ -1,33 +1,30 @@
-FROM ubuntu:20.04
-LABEL maintainer "Kazuki Ishigaki <k-ishigaki@frontier.hokudai.ac.jp>"
+FROM ubuntu:24.04
+LABEL maintainer "Kazuki Ishigaki <gakia5310027@gmail.com>"
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    git \
-    haskell-stack \
-    sudo \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential='12.10ubuntu1' \
+    curl='8.5.0-2ubuntu10.*' \
+    libffi-dev='3.4.6-1build1' \
+    libgmp-dev='2:6.3.0+dfsg-2ubuntu6' \
+    libgmp10='2:6.3.0+dfsg-2ubuntu6' \
+    libncurses-dev='6.4+20240113-1ubuntu2' \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN stack upgrade --binary-only
+# hadolint ignore=DL3008
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libffi8ubuntu1 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fLo /usr/local/bin/ghcup \
     https://downloads.haskell.org/~ghcup/x86_64-linux-ghcup && \
-    chmod +x /usr/local/bin/ghcup && \
-    ghcup install ghc 9.0.2 && \
-    ghcup set 9.0.2 && \
-    ghcup install cabal && \
-    ghcup install hls
+    chmod +x /usr/local/bin/ghcup
 
-ENV PATH=/root/.cabal/bin:/root/.ghcup/bin:$PATH
+ENV PATH=/usr/local/bin:$PATH
 
-RUN echo "developer ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/developer && \
-    chmod u+s `which groupadd` `which useradd` && \
-    { \
-    echo '#!/bin/sh -e'; \
-    echo 'getent group `id -g` || groupadd --gid `id -g` developer'; \
-    echo 'getent passwd `id -u` || useradd --uid `id -u` --gid `id -g` --home-dir /root developer'; \
-    echo 'sudo find /root -maxdepth 1 | xargs sudo chown `id -u`:`id -g`'; \
-    echo 'exec "$@"'; \
-    } > /entrypoint && chmod +x /entrypoint
-ENTRYPOINT [ "/entrypoint" ]
+RUN ghcup install ghc --set recommended && \
+    ghcup install cabal latest && \
+    ghcup install stack latest && \
+    ghcup install hls latest
+
+ENV PATH=/root/.ghcup/bin:$PATH
