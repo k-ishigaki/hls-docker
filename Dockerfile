@@ -1,5 +1,5 @@
 FROM ubuntu:24.04
-LABEL maintainer "Kazuki Ishigaki <gakia5310027@gmail.com>"
+LABEL maintainer="Kazuki Ishigaki <gakia5310027@gmail.com>"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential='12.10ubuntu1' \
@@ -22,9 +22,9 @@ RUN curl -fLo /usr/local/bin/ghcup \
 
 ENV PATH=/usr/local/bin:$PATH
 
-RUN ghcup install ghc --set recommended && \
-    ghcup install cabal latest && \
-    ghcup install stack latest && \
-    ghcup install hls latest
+RUN ghcup install ghc --set 9.10.1 && \
+    ghcup install cabal --set 3.10.3.0 && \
+    ghcup install stack --set 2.15.7 && \
+    ghcup install hls --set 2.8.0.0
 
 ENV PATH=/root/.ghcup/bin:$PATH
